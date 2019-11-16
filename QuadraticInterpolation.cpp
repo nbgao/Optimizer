@@ -48,6 +48,8 @@ double QuardraticInterpolation(double (*f)(double), double a, double b, double d
     }
     return s1;
 }*/
+
+/*
 double QuardraticInterpolation(double (*f)(double), double x0, double delta, double epsilon){
     double s0=x0, big=1e6, err=1, ds=1e-5;
     double f0=f(s0), h=1;
@@ -62,6 +64,7 @@ double QuardraticInterpolation(double (*f)(double), double x0, double delta, dou
         double s1=s0+h, s2=s0+2*h, s=s0;
         double f0=f(s0), f1=f(s1), f2=f(s2), fs=f(s);
         cond = 0;
+       
         while(abs(h)>delta && cond==0){
             if(f0<=f1){
                 s2 = s1;
@@ -107,7 +110,7 @@ double QuardraticInterpolation(double (*f)(double), double x0, double delta, dou
             if(h<delta)
                 cond = 1;
             if(abs(h)>big || abs(h_)>big)
-                cond = 5;
+                cond = 5;     
             err = abs(f1-fs);
             s0 = s;
             k++;
@@ -115,6 +118,41 @@ double QuardraticInterpolation(double (*f)(double), double x0, double delta, dou
         }
         if(cond==2 && h<delta)
             cond = 3;   
+    }
+    return s0;
+}
+*/
+
+double QuardraticInterpolation(double (*f)(double), double x0, double delta, double epsilon){
+    double s0=x0, err=1, ds=1e-5;
+    double f0=f(s0), h=1;
+    int k = 0;
+
+    while(err>epsilon || abs(h)>delta){
+        double df = (f(s0+ds)-f(s0-ds))/(2*ds);
+        if(df>0)
+            h = -abs(h);
+        double s1=s0+h, s2=s0+2*h, s=s0;
+        double f0=f(s0), f1=f(s1), f2=f(s2), fs=f(s);
+
+        double d = 2*(2*f1-f0-f2), h_;
+        if(d<0)
+            h_ = h*(4*f1-3*f0-f2)/d;
+        else
+            h_ = h/3;
+
+        s = s0 + h_;
+        fs = f(s);
+        h = abs(h);
+        double h0 = abs(h_), h1 = abs(h_-h), h2 = abs(h_-2*h);
+
+        h = min(h0, min(h1, h2));
+        if(h==0)
+            h = h_;
+        err = abs(f1-fs);
+        s0 = s;
+        k++;
+        printf("step=%d s0=%.6f s1=%.6f s2=%.6f f0=%.6f f1=%.6f f2=%.6f\n", k, s0, s1, s2, f0, f1, f2);
     }
     return s0;
 }
